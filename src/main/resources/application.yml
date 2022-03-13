@@ -1,0 +1,4 @@
+server:
+  port: 9093
+api-server:
+  url: http://url:9092
