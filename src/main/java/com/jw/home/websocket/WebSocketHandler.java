@@ -2,12 +2,12 @@ package com.jw.home.websocket;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jw.home.rest.APIServerCaller;
-import com.jw.home.rest.AsyncResponseManager;
+import com.jw.home.event.AppEventPublisher;
+import com.jw.home.event.ControlResultEvent;
 import com.jw.home.service.DeviceService;
 import com.jw.home.websocket.dto.WebSocketProtocol;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -20,16 +20,14 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
+@RequiredArgsConstructor
 @Slf4j
 public class WebSocketHandler extends TextWebSocketHandler {
-    @Autowired
-    private APIServerCaller apiServerCaller;
-    @Autowired
-    private ConnectionManager connectionManager;
-    @Autowired
-    private DeviceService deviceService;
-    @Autowired
-    private AsyncResponseManager asyncResponseManager;
+    private final ConnectionManager connectionManager;
+
+    private final DeviceService deviceService;
+
+    private final AppEventPublisher appEventPublisher;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     // < Serial, Session > TODO 배치 삭제
@@ -37,6 +35,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+        // (ex) ws://localhost:9093/websocket/connect?serial=01280001s
         log.info("[established connection] sessionId : {}", session.getId());
         String rawQuery = Objects.requireNonNull(session.getUri()).getRawQuery();
         if (rawQuery == null) {
@@ -60,6 +59,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
         if (deviceService.isRegisteredDevice(serial)) {
             connectionManager.addSession(serial, session);
+            // TODO notify api server (device status to online)
         } else {
             tempSessions.put(serial, session);
         }
@@ -73,7 +73,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         connectionManager.removeSession(deviceSerial);
         tempSessions.remove(deviceSerial);
 
-        // TODO DB update (device status to offline)
+        // TODO notify api server (device status to offline)
     }
 
     @Override
@@ -91,15 +91,14 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     log.warn("Not match device serial : {} - {}", serial, data.get("serial"));
                     return;
                 }
-                boolean result = apiServerCaller.registerDevice(data);
+                boolean result = deviceService.registerDevice(data);
                 if (result) {
                     connectionManager.addSession(serial, session);
                     tempSessions.remove(serial);
                 }
                 break;
             case controlResult:
-                String transactionId = payload.getTransactionId();
-                asyncResponseManager.sendResult(transactionId, data);
+                appEventPublisher.publish(new ControlResultEvent(this, payload.getTransactionId(), serial, data));
                 break;
             default:
                 break;

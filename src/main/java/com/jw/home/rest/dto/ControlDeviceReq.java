@@ -15,7 +15,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class ControlDeviceReq {
     @NotEmpty
-    String deviceId;
+    String serial;
     @NotEmpty
     String command;
     @NotNull

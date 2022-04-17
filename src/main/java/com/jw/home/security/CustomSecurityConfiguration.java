@@ -39,10 +39,10 @@ public class CustomSecurityConfiguration extends WebSecurityConfigurerAdapter {
 			.csrf().disable()
 			.authorizeRequests((authorizeRequests) -> 
 				authorizeRequests
-					.antMatchers(HttpMethod.GET, "/websocket/connect").hasAuthority("SCOPE_jw.home")
+					// TODO Authorize
+					.antMatchers(HttpMethod.GET, "/websocket/connect").permitAll()
 					.antMatchers(HttpMethod.PUT, "/api/v1/devices/control").permitAll()
 					.anyRequest().authenticated()
-
 			)
 			.oauth2ResourceServer(oauth -> {
 				oauth.jwt();

@@ -36,7 +36,20 @@ public class APIServerCaller {
                 return false;
             }
         } catch (Exception e) {
-            log.warn("Failed to call API server", e);
+            log.warn("Failed to call API server (registerDevice)", e);
+        }
+        return true;
+    }
+
+    public boolean isRegisteredDevice(String serial) {
+        String url = apiServerUrl + "/api/v1/admin/devices?connection=websocket&serial=" + serial;
+        try {
+            ResponseEntity<APIServerResponseDto> response = restTemplate.getForEntity(url, APIServerResponseDto.class);
+            if (response.getStatusCode() != HttpStatus.OK) {
+                return false;
+            }
+        } catch (Exception e) {
+            log.warn("Failed to call API server (isRegisteredDevice)", e);
         }
         return true;
     }
