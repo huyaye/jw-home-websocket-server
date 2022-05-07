@@ -2,8 +2,6 @@ package com.jw.home.websocket;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jw.home.event.AppEventPublisher;
-import com.jw.home.event.ControlResultEvent;
 import com.jw.home.service.DeviceService;
 import com.jw.home.websocket.dto.WebSocketProtocol;
 import lombok.RequiredArgsConstructor;
@@ -24,10 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class WebSocketHandler extends TextWebSocketHandler {
     private final ConnectionManager connectionManager;
-
     private final DeviceService deviceService;
-
-    private final AppEventPublisher appEventPublisher;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     // < Serial, Session > TODO 배치 삭제
@@ -98,7 +93,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 }
                 break;
             case controlResult:
-                appEventPublisher.publish(new ControlResultEvent(this, payload.getTransactionId(), serial, data));
+                deviceService.notifyControlResult(data);
                 break;
             default:
                 break;

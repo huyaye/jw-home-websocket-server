@@ -1,4 +1,4 @@
-package com.jw.home.rest.dto;
+package com.jw.home.redis.dto;
 
 public enum ControlDeviceStatus {
     SUCCESS,

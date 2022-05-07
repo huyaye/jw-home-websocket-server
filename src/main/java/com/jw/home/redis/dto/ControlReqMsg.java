@@ -1,4 +1,4 @@
-package com.jw.home.rest.dto;
+package com.jw.home.redis.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,7 +13,9 @@ import java.util.Map;
 @Setter
 @ToString
 @NoArgsConstructor
-public class ControlDeviceReq {
+public class ControlReqMsg {
+    @NotEmpty
+    String transactionId;
     @NotEmpty
     String serial;
     @NotEmpty

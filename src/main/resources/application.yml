@@ -1,4 +1,13 @@
 server:
   port: 9093
+spring:
+  redis:
+    host: host
+    port: 6379
+    password: password
+    pubsub:
+      device:
+        control-request-channel: websocket-control-request
+        control-response-channel: websocket-control-response
 api-server:
   url: http://url:9092

@@ -1,4 +1,4 @@
-package com.jw.home.rest.dto;
+package com.jw.home.redis.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
@@ -14,7 +14,9 @@ import java.util.Map;
 @ToString
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ControlDeviceRes {
+public class ControlResMsg {
+    @NotEmpty
+    private String transactionId;
     @NotEmpty
     private ControlDeviceStatus status;
 
