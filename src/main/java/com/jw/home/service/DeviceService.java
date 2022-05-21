@@ -5,6 +5,7 @@ import com.jw.home.redis.RedisPublisher;
 import com.jw.home.redis.dto.ControlReqMsg;
 import com.jw.home.rest.APIServerCaller;
 import com.jw.home.websocket.ConnectionManager;
+import com.jw.home.websocket.SessionInfo;
 import com.jw.home.websocket.dto.ProtocolType;
 import com.jw.home.websocket.dto.WebSocketProtocol;
 import lombok.RequiredArgsConstructor;
@@ -26,17 +27,18 @@ public class DeviceService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public boolean isRegisteredDevice(String serial) {
-        return apiServerCaller.isRegisteredDevice(serial);
+    public String getDeviceId(String serial) {
+        return apiServerCaller.getDeviceId(serial);
     }
 
     public void controlDevice(ControlReqMsg controlReqMsg) throws IOException {
         String serial = controlReqMsg.getSerial();
-        WebSocketSession session = connectionManager.getSession(serial);
-        if (session == null) {
+        SessionInfo sessionInfo = connectionManager.getSessionInfo(serial);
+        if (sessionInfo == null) {
             log.debug("Not exist websocket session : {}", serial);
             return;
         }
+        WebSocketSession session = sessionInfo.getSession();
         log.debug("Exist session : request through websocket");
         WebSocketProtocol<ControlReqMsg> protocol = new WebSocketProtocol<>();
         protocol.setType(ProtocolType.control);
@@ -48,7 +50,7 @@ public class DeviceService {
         redisPublisher.publishDeviceControlResult(result);
     }
 
-    public boolean registerDevice(Map<String, Object> data) {
+    public String registerDevice(Map<String, Object> data) {
         return apiServerCaller.registerDevice(data);
     }
 }

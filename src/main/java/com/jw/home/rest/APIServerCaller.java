@@ -22,7 +22,7 @@ public class APIServerCaller {
         this.restTemplate = new RestTemplate(HttpUtil.getHttpRequestFactory());
     }
 
-    public boolean registerDevice(Map<String, Object> payload) {
+    public String registerDevice(Map<String, Object> payload) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 //        headers.add("Authorization", "Bearer " + clientAccessToken);
@@ -33,24 +33,26 @@ public class APIServerCaller {
         try {
             ResponseEntity<APIServerResponseDto> response = restTemplate.postForEntity(url, request, APIServerResponseDto.class);
             if (response.getStatusCode() != HttpStatus.OK) {
-                return false;
+                return null;
             }
+            return (String) response.getBody().getResultData().get("id");
         } catch (Exception e) {
-            log.warn("Failed to call API server (registerDevice)", e);
+            log.warn("Failed to call API server (registerDevice) : {}", e.getMessage());
         }
-        return true;
+        return null;
     }
 
-    public boolean isRegisteredDevice(String serial) {
-        String url = apiServerUrl + "/api/v1/admin/devices?connection=websocket&serial=" + serial;
+    public String getDeviceId(String serial) {
+        String url = apiServerUrl + "/api/v1/admin/devices/id?connection=websocket&serial=" + serial;
         try {
             ResponseEntity<APIServerResponseDto> response = restTemplate.getForEntity(url, APIServerResponseDto.class);
             if (response.getStatusCode() != HttpStatus.OK) {
-                return false;
+                return null;
             }
+            return (String) response.getBody().getResultData().get("id");
         } catch (Exception e) {
-            log.warn("Failed to call API server (isRegisteredDevice)", e);
+            log.info("Failed to call API server (getDeviceId) : {}", e.getMessage());
         }
-        return true;
+        return null;
     }
 }

@@ -45,15 +45,19 @@ public class WebSocketHandler extends TextWebSocketHandler {
             return;
         }
         // sessions 에 serial 에 해당하는 session 이 있으면 요청 session 바로 해제.
-        if (connectionManager.getSession(serial) != null) {
+        if (connectionManager.existSessionInfo(serial)) {
             log.warn("device {} session is already existed.", serial);
             session.close();
             return;
         }
         session.getAttributes().put("serial", serial);
-
-        if (deviceService.isRegisteredDevice(serial)) {
-            connectionManager.addSession(serial, session);
+        String deviceId = deviceService.getDeviceId(serial);
+        /*
+         * deviceId 가 null 이 아니면 사용자에게 정상 등록된 디바이스임.
+         * 네트워크 문제등으로 연결이 끊어졌다가 다시 연결 요청이 온 경우
+         */
+        if (deviceId != null) {
+            connectionManager.putSessionInfo(serial, new SessionInfo(deviceId, session));
             // TODO notify api server (device status to online)
         } else {
             tempSessions.put(serial, session);
@@ -65,7 +69,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         String deviceSerial = (String) session.getAttributes().get("serial");
         log.info("[closed connection] sessionId : {}, deviceSerial : {}", session.getId(), deviceSerial);
 
-        connectionManager.removeSession(deviceSerial);
+        connectionManager.removeSessionInfo(deviceSerial);
         tempSessions.remove(deviceSerial);
 
         // TODO notify api server (device status to offline)
@@ -86,9 +90,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     log.warn("Not match device serial : {} - {}", serial, data.get("serial"));
                     return;
                 }
-                boolean result = deviceService.registerDevice(data);
-                if (result) {
-                    connectionManager.addSession(serial, session);
+                String deviceId = deviceService.registerDevice(data);
+                if (deviceId != null) {
+                    connectionManager.putSessionInfo(serial, new SessionInfo(deviceId, session));
                     tempSessions.remove(serial);
                 }
                 break;
