@@ -2,6 +2,7 @@ package com.jw.home.websocket;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jw.home.domain.TriggerType;
 import com.jw.home.service.DeviceService;
 import com.jw.home.websocket.dto.WebSocketProtocol;
 import lombok.RequiredArgsConstructor;
@@ -55,10 +56,11 @@ public class WebSocketHandler extends TextWebSocketHandler {
         /*
          * deviceId 가 null 이 아니면 사용자에게 정상 등록된 디바이스임.
          * 네트워크 문제등으로 연결이 끊어졌다가 다시 연결 요청이 온 경우
+         * TODO 서버 재기동시와 구분할 수 있는 방법이 있는지..
          */
         if (deviceId != null) {
             connectionManager.putSessionInfo(serial, new SessionInfo(deviceId, session));
-            // TODO notify api server (device status to online)
+            deviceService.notifyChangeConnection(connectionManager.getSessionInfo(serial).getDeviceId(), serial, true);
         } else {
             tempSessions.put(serial, session);
         }
@@ -66,13 +68,15 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        String deviceSerial = (String) session.getAttributes().get("serial");
-        log.info("[closed connection] sessionId : {}, deviceSerial : {}", session.getId(), deviceSerial);
+        String serial = (String) session.getAttributes().get("serial");
+        log.info("[closed connection] sessionId : {}, deviceSerial : {}", session.getId(), serial);
 
-        connectionManager.removeSessionInfo(deviceSerial);
-        tempSessions.remove(deviceSerial);
-
-        // TODO notify api server (device status to offline)
+        SessionInfo sessionInfo = connectionManager.getSessionInfo(serial);
+        if (sessionInfo != null) {
+            deviceService.notifyChangeConnection(sessionInfo.getDeviceId(), serial, false);
+            connectionManager.removeSessionInfo(serial);
+        }
+        tempSessions.remove(serial);
     }
 
     @Override
@@ -98,6 +102,14 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 break;
             case controlResult:
                 deviceService.notifyControlResult(data);
+                break;
+            case changeState:
+                TriggerType trigger = TriggerType.valueOf((String) data.get("trigger"));
+                @SuppressWarnings("unchecked")
+                Map<String, Object> states = (Map<String, Object>) data.get("states");
+                deviceService.notifyChangeState(trigger,
+                        connectionManager.getSessionInfo(serial).getDeviceId(),
+                        serial, states);
                 break;
             default:
                 break;

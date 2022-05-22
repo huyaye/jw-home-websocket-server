@@ -43,6 +43,9 @@
         </filter>
     </appender>
 
+    <logger name="org.apache.kafka.clients.producer.ProducerConfig" level="OFF" />
+    <logger name="org.apache.kafka.common.utils.AppInfoParser" level="OFF" />
+
     <springProfile name="develop">
         <root level="DEBUG">
             <appender-ref ref="LOG_BASE_FILE" />

@@ -9,5 +9,9 @@ spring:
       device:
         control-request-channel: websocket-control-request
         control-response-channel: websocket-control-response
+  kafka:
+    bootstrap-servers: broker:9092
+    topics:
+      device-state: ec2.jwhome.dev.device-state.json
 api-server:
   url: http://url:9092

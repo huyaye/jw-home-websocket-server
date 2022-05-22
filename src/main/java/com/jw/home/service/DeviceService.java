@@ -1,6 +1,9 @@
 package com.jw.home.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jw.home.domain.TriggerType;
+import com.jw.home.kafka.KafkaProducer;
+import com.jw.home.kafka.dto.DeviceStateValue;
 import com.jw.home.redis.RedisPublisher;
 import com.jw.home.redis.dto.ControlReqMsg;
 import com.jw.home.rest.APIServerCaller;
@@ -24,6 +27,7 @@ public class DeviceService {
     private final APIServerCaller apiServerCaller;
     private final ConnectionManager connectionManager;
     private final RedisPublisher redisPublisher;
+    private final KafkaProducer kafkaProducer;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -52,5 +56,22 @@ public class DeviceService {
 
     public String registerDevice(Map<String, Object> data) {
         return apiServerCaller.registerDevice(data);
+    }
+
+    public void notifyChangeState(TriggerType trigger, String deviceId, String serial, Map<String, Object> states) {
+        DeviceStateValue value = DeviceStateValue.builder()
+                .connection("websocket")
+                .trigger(trigger)
+                .serial(serial)
+                .states(states).build();
+        kafkaProducer.produceDeviceState(deviceId, value);
+    }
+
+    public void notifyChangeConnection(String deviceId, String serial, boolean online) {
+        DeviceStateValue value = DeviceStateValue.builder()
+                .connection("websocket")
+                .serial(serial)
+                .online(online).build();
+        kafkaProducer.produceDeviceState(deviceId, value);
     }
 }
