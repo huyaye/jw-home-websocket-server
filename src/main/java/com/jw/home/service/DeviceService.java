@@ -6,7 +6,7 @@ import com.jw.home.kafka.KafkaProducer;
 import com.jw.home.kafka.dto.DeviceStateValue;
 import com.jw.home.redis.RedisPublisher;
 import com.jw.home.redis.dto.ControlReqMsg;
-import com.jw.home.rest.APIServerCaller;
+import com.jw.home.client.APIServerCaller;
 import com.jw.home.websocket.ConnectionManager;
 import com.jw.home.websocket.SessionInfo;
 import com.jw.home.websocket.dto.ProtocolType;

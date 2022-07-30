@@ -1,6 +1,8 @@
 server:
   port: 9093
 spring:
+  application:
+    name: websocket-server
   redis:
     host: host
     port: 6379
@@ -13,5 +15,9 @@ spring:
     bootstrap-servers: broker:9092
     topics:
       device-state: ec2.jwhome.dev.device-state.json
-api-server:
-  url: http://url:9092
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://127.0.0.1:8761/eureka
