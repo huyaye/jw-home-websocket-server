@@ -11,7 +11,7 @@
     </parent>
     <groupId>com.jw.home</groupId>
     <artifactId>websocket</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
     <name>jw-home-websocket-server</name>
     <description>IoT device controller</description>
     <properties>
