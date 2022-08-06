@@ -4,20 +4,23 @@ spring:
   application:
     name: websocket-server
   redis:
-    host: host
-    port: 6379
-    password: password
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASS:pass}
     pubsub:
       device:
         control-request-channel: websocket-control-request
         control-response-channel: websocket-control-response
   kafka:
-    bootstrap-servers: broker:9092
+    bootstrap-servers: ${KAFKA_BROKERS:localhost:9092}
     topics:
       device-state: ec2.jwhome.dev.device-state.json
 eureka:
+  instance:
+    prefer-ip-address: true
+    hostname: eureka-0
   client:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: http://127.0.0.1:8761/eureka
+      defaultZone: ${EUREKA_SERVER_ADDRESS:http://127.0.0.1:8761/eureka}

@@ -46,15 +46,19 @@
     <logger name="org.apache.kafka.clients.producer.ProducerConfig" level="OFF" />
     <logger name="org.apache.kafka.common.utils.AppInfoParser" level="OFF" />
 
-    <springProfile name="develop">
-        <root level="DEBUG">
-            <appender-ref ref="LOG_BASE_FILE" />
-        </root>
-    </springProfile>
+    <root level="DEBUG">
+        <appender-ref ref="CONSOLE" />
+    </root>
 
-    <springProfile name="local">
-        <root level="DEBUG">
-            <appender-ref ref="CONSOLE" />
-        </root>
-    </springProfile>
+<!--    <springProfile name="develop">-->
+<!--        <root level="DEBUG">-->
+<!--            <appender-ref ref="LOG_BASE_FILE" />-->
+<!--        </root>-->
+<!--    </springProfile>-->
+
+<!--    <springProfile name="local">-->
+<!--        <root level="DEBUG">-->
+<!--            <appender-ref ref="CONSOLE" />-->
+<!--        </root>-->
+<!--    </springProfile>-->
 </configuration>
