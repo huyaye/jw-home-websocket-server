@@ -40,6 +40,7 @@ public class CustomSecurityConfiguration extends WebSecurityConfigurerAdapter {
 			.authorizeRequests((authorizeRequests) -> 
 				authorizeRequests
 					// TODO Authorize
+					.antMatchers( "/actuator/**").permitAll()
 					.antMatchers(HttpMethod.GET, "/websocket/connect").permitAll()
 					.antMatchers(HttpMethod.PUT, "/api/v1/devices/control").permitAll()
 					.anyRequest().authenticated()

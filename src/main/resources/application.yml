@@ -15,6 +15,14 @@ spring:
     bootstrap-servers: ${KAFKA_BROKERS:localhost:9092}
     topics:
       device-state: ec2.jwhome.dev.device-state.json
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics, prometheus
+  metrics:
+    tags:
+      application: ${spring.application.name}
 eureka:
   instance:
     prefer-ip-address: true
